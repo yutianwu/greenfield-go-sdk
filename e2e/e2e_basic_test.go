@@ -89,6 +89,73 @@ func (s *BasicTestSuite) Test_Account() {
 	s.Require().Equal(len(paymentAccountsByOwner), numPaymentAccounts+1)
 }
 
+func (s *BasicTestSuite) Test_PrepareAccount() {
+	balance, err := s.Client.GetAccountBalance(s.ClientContext, s.DefaultAccount.GetAddress().String())
+	s.Require().NoError(err)
+	s.T().Logf("Balance: %s", balance.String())
+
+	account1, _, err := types.NewAccount("test2")
+	s.Require().NoError(err)
+	transferTxHash, err := s.Client.Transfer(s.ClientContext, account1.GetAddress().String(), math.NewIntFromUint64(1e18), types2.TxOption{})
+	s.Require().NoError(err)
+	s.T().Logf("Transfer response: %s", transferTxHash)
+
+	waitForTx, err := s.Client.WaitForTx(s.ClientContext, transferTxHash)
+	s.Require().NoError(err)
+	s.T().Logf("Wair for tx: %s", hex.EncodeToString(waitForTx.Hash))
+
+	account2, _, err := types.NewAccount("test3")
+	s.Require().NoError(err)
+	transferTxHash, err = s.Client.Transfer(s.ClientContext, account2.GetAddress().String(), math.NewIntFromUint64(1e18), types2.TxOption{})
+	s.Require().NoError(err)
+	s.T().Logf("Transfer response: %s", transferTxHash)
+
+	waitForTx, err = s.Client.WaitForTx(s.ClientContext, transferTxHash)
+	s.Require().NoError(err)
+	s.T().Logf("Wair for tx: %s", hex.EncodeToString(waitForTx.Hash))
+
+	s.Client.SetDefaultAccount(account1)
+	transferTxHash, err = s.Client.Transfer(s.ClientContext, account2.GetAddress().String(), math.NewIntFromUint64(1), types2.TxOption{})
+	s.Require().NoError(err)
+	s.T().Logf("Transfer response: %s", transferTxHash)
+
+	waitForTx, err = s.Client.WaitForTx(s.ClientContext, transferTxHash)
+	s.Require().NoError(err)
+	s.T().Logf("Wair for tx: %s", hex.EncodeToString(waitForTx.Hash))
+
+}
+
+func (s *BasicTestSuite) Test_AccountPrepare() {
+	balance, err := s.Client.GetAccountBalance(s.ClientContext, s.DefaultAccount.GetAddress().String())
+	s.Require().NoError(err)
+	s.T().Logf("Balance: %s", balance.String())
+
+	account1, err := types.NewAccountFromPrivateKey("test2", "bc6e02007a6d1ba1a0b1e3c85bbeb3570959683a60b4233a7fa6d99c4911168d")
+	s.Require().NoError(err)
+
+	account2, _, err := types.NewAccount("test3")
+	s.Require().NoError(err)
+
+	account3, err := types.NewAccountFromPrivateKey("test2", "575e81e383bbef8fef5d251f9e1700a2a227be3d87202a99a5f92614fbae5c02")
+	s.Require().NoError(err)
+
+	s.Client.SetDefaultAccount(account3)
+
+	transferTxHash, err := s.Client.Transfer(s.ClientContext, account2.GetAddress().String(), math.NewIntFromUint64(1), types2.TxOption{
+		FeePayer: account1.GetAddress(),
+	})
+	s.Require().NoError(err)
+	s.T().Logf("Transfer response: %s", transferTxHash)
+
+	waitForTx, err := s.Client.WaitForTx(s.ClientContext, transferTxHash)
+	s.Require().NoError(err)
+	s.T().Logf("Wair for tx: %s", hex.EncodeToString(waitForTx.Hash))
+
+	balance, err = s.Client.GetAccountBalance(s.ClientContext, account1.GetAddress().String())
+	s.Require().NoError(err)
+	s.T().Logf("Balance: %s", balance.String())
+}
+
 func (s *BasicTestSuite) Test_MultiTransfer() {
 	transferDetails := make([]types.TransferDetail, 0)
 	totalSendAmount := math.NewInt(0)

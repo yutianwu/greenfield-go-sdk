@@ -4,10 +4,11 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	storageTypes "github.com/bnb-chain/greenfield/x/storage/types"
 	"os"
 	"path/filepath"
 	"time"
+
+	storageTypes "github.com/bnb-chain/greenfield/x/storage/types"
 
 	"github.com/bnb-chain/greenfield-go-sdk/client"
 	"github.com/bnb-chain/greenfield-go-sdk/types"
@@ -15,7 +16,7 @@ import (
 )
 
 var (
-	Endpoint = "http://localhost:26750"
+	Endpoint = "http://localhost.charlesproxy.com:8080/gnfd"
 	ChainID  = "greenfield_9000-121"
 )
 

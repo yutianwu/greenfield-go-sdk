@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	Endpoint = "http://localhost.charlesproxy.com:8080/gnfd"
+	Endpoint = "http://localhost:8080/gnfd"
 	ChainID  = "greenfield_9000-121"
 )
 
